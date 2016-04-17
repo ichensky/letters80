@@ -58,12 +58,14 @@ int main(int argc, char **argv){
     read=getline(&line,&len,fp);
     while(read!=-1){
 
-      mbslen = mbstowcs(NULL, line, 0);
-      if (mbslen == (size_t) -1) {
-	perror("mbstowcs");
-	exit(EXIT_FAILURE);
+      mbslen=read;
+      if(mbslen>str_len){
+	mbslen = mbstowcs(NULL, line, 0);
+	if (mbslen == (size_t) -1) {
+	  perror("mbstowcs");
+	  exit(EXIT_FAILURE);
+	}
       }
-
       if(mbslen > str_len){
 	wcs=calloc(mbslen, sizeof(wchar_t));
 	if (wcs == NULL) {
@@ -75,11 +77,10 @@ int main(int argc, char **argv){
 	  exit(EXIT_FAILURE);
 	}
 
-	for (j=0; j<mbslen; j+=str_len) {
-	  k=mbslen-str_len*j;
-	  if (k>str_len) {
+	for (j=0; j<mbslen-1; j+=str_len) {
+	  k=mbslen-1-j;
 	    wcsncpy(str, wcs+j,str_len); 
-
+	  if (k>str_len) {
 	    for (l=str_len-1; l>0; l--) {
 	      if(str[l]==' '){
 		str[l]='\0';
@@ -89,18 +90,14 @@ int main(int argc, char **argv){
   
 	    }
 
-	    fprintf(fph,"%ls\n",str);
-	  }else{
-	    wcsncpy(str, wcs+j,k); 
-	    fprintf(fph,"%ls\n",str);
 	  }
+	    fprintf(fph,"%ls\n",str);
 	}
 
 
       }
       else{
-
-	fprintf(fph,"%s\n",line);
+	  fprintf(fph,"%s",line);
       }
 	   
       read=getline(&line,&len,fp);
