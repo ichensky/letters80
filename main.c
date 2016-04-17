@@ -28,6 +28,7 @@ int main(int argc, char **argv){
   wchar_t *wcs;
   size_t j;
   size_t k;
+  size_t l;
   for (i = 1; i < argc; i++) {
 
     fp=fopen(argv[i], "r");
@@ -77,10 +78,22 @@ int main(int argc, char **argv){
 	for (j=0; j<mbslen; j+=str_len) {
 	  k=mbslen-str_len*j;
 	  if (k>str_len) {
-	    k=str_len;
+	    wcsncpy(str, wcs+j,str_len); 
+
+	    for (l=str_len-1; l>0; l--) {
+	      if(str[l]==' '){
+		str[l]='\0';
+		j-=str_len-l-1;
+		break;
+	      }
+  
+	    }
+
+	    fprintf(fph,"%ls\n",str);
+	  }else{
+	    wcsncpy(str, wcs+j,k); 
+	    fprintf(fph,"%ls\n",str);
 	  }
-	  wcsncpy(str, wcs+j,k); 
-	  fprintf(fph,"%ls\n",str);
 	}
 
 
