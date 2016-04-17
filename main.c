@@ -5,7 +5,7 @@
 int main(int argc, char **argv){
   if(argc<2){
     perror("File name not specified");
-    return (-1);
+      exit(EXIT_FAILURE);
   }
 
   setlocale(LC_ALL, "");
@@ -24,8 +24,12 @@ int main(int argc, char **argv){
   char *tmp_file_name;
   size_t tmp_file_name_len;
 
-  size_t mbslen;
-  wchar_t *wcs;
+  size_t mbslen=0;
+  wchar_t *wcs=malloc(0);
+  if (wcs == NULL) {
+  	    perror("malloc");
+  	    exit(EXIT_FAILURE);
+    }    
   size_t j;
   size_t k;
   size_t l;
@@ -52,9 +56,8 @@ int main(int argc, char **argv){
       fprintf(stderr, "Can't open/create file: %s\n", tmp_file_name);
       exit(EXIT_FAILURE);
     }
-
-
-    
+ 
+	  
     read=getline(&line,&len,fp);
     while(read!=-1){
 
@@ -67,11 +70,12 @@ int main(int argc, char **argv){
 	}
       }
       if(mbslen > str_len){
-	wcs=calloc(mbslen, sizeof(wchar_t));
-	if (wcs == NULL) {
-	  perror("calloc");
-	  exit(EXIT_FAILURE);
-	}
+	  wcs=realloc(wcs,mbslen* sizeof(wchar_t));
+	  if (wcs == NULL) {
+	    perror("realloc");
+	    exit(EXIT_FAILURE);
+	  }  
+	
 	if (mbstowcs(wcs, line, mbslen) == (size_t) -1) {
 	  perror("mbstowcs");
 	  exit(EXIT_FAILURE);
@@ -79,8 +83,8 @@ int main(int argc, char **argv){
 
 	for (j=0; j<mbslen-1; j+=str_len) {
 	  k=mbslen-1-j;
-	    wcsncpy(str, wcs+j,str_len); 
 	  if (k>str_len) {
+	    wcsncpy(str, wcs+j,str_len); 
 	    for (l=str_len-1; l>0; l--) {
 	      if(str[l]==' '){
 		str[l]='\0';
@@ -89,9 +93,12 @@ int main(int argc, char **argv){
 	      }
   
 	    }
-
 	  }
-	    fprintf(fph,"%ls\n",str);
+	  else{
+	    wcsncpy(str, wcs+j,k); 
+	    str[k]='\0';
+	  }
+	  fprintf(fph,"%ls\n",str);
 	}
 
 
@@ -110,6 +117,7 @@ int main(int argc, char **argv){
   //free(line);
   //}
   //free(str);
+  //free(wcs);
   printf("\n");
   exit(EXIT_SUCCESS);
 }
